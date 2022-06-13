@@ -218,6 +218,7 @@
       
 ! Agregado por Giovanni Gamaliel Lopez Padilla
       integer hour,ihour,fhour
+      CHARACTER*6 fileout
 
 * --- END OF DECLARATIONS ---------------------------------------------
 * re-entry point
@@ -233,7 +234,7 @@
       open(13,file="../data.txt")
 ! Handle for EOF
       do
-      read(13,*,err=504,End = 504) inpfil, outfil,tauaer,
+      read(13,*,err=504,End = 504) inpfil, fileout,tauaer,
      $            o3_tc,iyear,imonth,iday,ihour,fhour
       CALL rdinp(intrct, 
      $     inpfil, outfil, nstr,   lat,    lon,    tmzone,
@@ -246,6 +247,8 @@
      $     ljvals, ijfix,  nmj,    iwfix,  itfix,  izfix,
      $     ims,    slabel, imj,    jlabel)
       iout = 30
+! Custom fileout
+      outfil=fileout
 !Ciclo para calcular la irradiancia para cada minuto cada hora
       do hour=ihour,fhour-1
       tstart=hour
