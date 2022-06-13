@@ -10,7 +10,7 @@ The file `data.txt` must be outside of `src` folder with this format
 
 ## Compilation results
 
-`bash
+```
 gfortran -O -c numer.f
 gfortran -O -c functs.f
 gfortran -O -c orbit.f
@@ -57,4 +57,4 @@ gfortran -O -c waters.f
 gfortran -O -c swdom.f
 gfortran -O -c setaer.f
 gfortran -O numer.o functs.o orbit.o terint.o TUV.o grids.o rdinp.o rdetfl.o rdxs.o swphys.o swbiol.o swchem.o rxn.o qys.o wshift.o vpair.o vptmp.o vpo3.o odrl.o odo3.o setalb.o setcld.o setsnw.o setno2.o seto2.o setso2.o sphers.o la_srb.o rtrans.o savout.o newlst.o wrflut.o waters.o swdom.o setaer.o -o tuv.out
-`
+```
