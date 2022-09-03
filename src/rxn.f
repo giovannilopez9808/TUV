@@ -689,7 +689,7 @@ c      myld = kjpl00
 
 
 * mabs = 1:  Graham and Johnston 1978
-* mabs = 2:  JPL94
+* mabs = 2:  Graham and Johnston for w < 600, JPL94 for w > 600 nm
 * mabs = 3:  JPL11
 
       mabs = 3
@@ -701,7 +701,7 @@ c      myld = kjpl00
 
 * cross section
 
-      IF(mabs. eq. 1) then
+      IF(mabs .eq. 1 .or. mabs .eq. 2) then
 
 *     measurements of Graham and Johnston 1978
 
@@ -730,35 +730,37 @@ c      myld = kjpl00
             STOP
          ENDIF
 
-      ELSEIF(mabs .EQ. 2) THEN
+         IF(mabs .EQ. 2) THEN
 
-*     cross section from JPL94:
+*  overwrite for w>600 nm using JPL94 values:
 
-         OPEN(UNIT=kin,FILE='DATAJ1/ABS/NO3_jpl94.abs',STATUS='old')
-         READ(kin,*) idum, n
-         DO i = 1, idum-2
-            READ(kin,*)
-         ENDDO
-         DO i = 1, n
-            READ(kin,*) x1(i), y1(i)
-            y1(i) = y1(i)*1E-20
-         ENDDO 
-         CLOSE (kin)
-         CALL addpnt(x1,y1,kdata,n,x1(1)*(1.-deltax),0.)
-         CALL addpnt(x1,y1,kdata,n,               0.,0.)
-         CALL addpnt(x1,y1,kdata,n,x1(n)*(1.+deltax),0.)
-         CALL addpnt(x1,y1,kdata,n,           1.e+38,0.)
-         CALL inter2(nw,wl,yg1,n,x1,y1,ierr)
-         IF (ierr .NE. 0) THEN
-            WRITE(*,*) ierr, jlabel(j)
-            STOP
+            OPEN(UNIT=kin,FILE='DATAJ1/ABS/NO3_jpl94.abs',STATUS='old')
+            READ(kin,*) idum, n
+            DO i = 1, idum-2
+               READ(kin,*)
+            ENDDO
+            DO i = 1, n
+               READ(kin,*) x1(i), y1(i)
+               y1(i) = y1(i)*1E-20
+            ENDDO 
+            CLOSE (kin)
+            CALL addpnt(x1,y1,kdata,n,x1(1)*(1.-deltax),0.)
+            CALL addpnt(x1,y1,kdata,n,               0.,0.)
+            CALL addpnt(x1,y1,kdata,n,x1(n)*(1.+deltax),0.)
+            CALL addpnt(x1,y1,kdata,n,           1.e+38,0.)
+            CALL inter2(nw,wl,yg1,n,x1,y1,ierr)
+            IF (ierr .NE. 0) THEN
+               WRITE(*,*) ierr, jlabel(j)
+               STOP
+            ENDIF
+
+* assign JPL94 values
+
+            DO iw = 1, nw-1
+               IF(wl(iw) .GT. 600.) yg(iw) = yg1(iw)
+            ENDDO
+
          ENDIF
-
-* (use JPL94 for wavelengths longer than 600 nm)
-
-         DO iw = 1, nw-1
-            IF(wl(iw) .GT. 600.) yg(iw) = yg1(iw)
-         ENDDO
 
 * cross sections from JPL2011
 
@@ -779,7 +781,7 @@ c      myld = kjpl00
          CALL addpnt(x1,y1,kdata,n,               0.,0.)
          CALL addpnt(x1,y1,kdata,n,x1(n)*(1.+deltax),0.)
          CALL addpnt(x1,y1,kdata,n,           1.e+38,0.)
-         CALL inter2(nw,wl,yg1,n,x1,y1,ierr)
+         CALL inter2(nw,wl,yg,n,x1,y1,ierr)
          IF (ierr .NE. 0) THEN
             WRITE(*,*) ierr, jlabel(j)
             STOP
@@ -804,7 +806,7 @@ c      myld = kjpl00
                qy = 0.35*(wc(iw)-584.)/11.
             ENDIF
             DO i = 1, nz
-               sq(j-1,i,iw) = yg1(iw)*qy
+               sq(j-1,i,iw) = yg(iw)*qy
             ENDDO
          ENDDO
 
@@ -821,7 +823,7 @@ c      myld = kjpl00
                qy = 1.-0.35*(wc(iw)-584.)/11.
             ENDIF
             DO i = 1, nz
-               sq(j,i,iw) = yg1(iw)*qy
+               sq(j,i,iw) = yg(iw)*qy
             ENDDO
          ENDDO
 
@@ -939,12 +941,11 @@ c      myld = kjpl00
 
                endif
 
-               sq(j-1, iz, iw) = qy1 * yg1(iw)
-               sq(j,   iz, iw) = qy2 * yg1(iw)
+               sq(j-1, iz, iw) = qy1 * yg(iw)
+               sq(j,   iz, iw) = qy2 * yg(iw)
 
             ENDDO
          ENDDO
-
 
       ENDIF
 
@@ -6682,7 +6683,7 @@ C      ENDIF
       qy = 1.
 
       DO iz = 1, nz
-        t = MAX(255.,MIN(tlev(i),296.))
+        t = MAX(255.,MIN(tlev(iz),296.))
         IF (t .LE. 279.) THEN
           slope = (t-255.)/(279.-255.)
           DO iw = 1, nw-1

@@ -1,8 +1,8 @@
       PROGRAM tuv
 *-----------------------------------------------------------------------------*
 *=    Tropospheric Ultraviolet-Visible (TUV) radiation model                 =*
-*=    Version 5.3                                                            =*
-*=    June 2016                                                              =*
+*=    Version 5.4                                                            =*
+*=    November 2018                                                          =*
 *-----------------------------------------------------------------------------*
 *= Developed by Sasha Madronich with important contributions from:           =*
 *= Chris Fischer, Siri Flocke, Julia Lee-Taylor, Bernhard Meyer,             =*
@@ -27,7 +27,7 @@
 *= To obtain a copy of the GNU General Public License, write to:             =*
 *= Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.   =*
 *-----------------------------------------------------------------------------*
-*= Copyright (C) 1994-2016 by the University Corporation for Atmospheric     =*
+*= Copyright (C) 1994-2018 by the University Corporation for Atmospheric     =*
 *= Research, extending to all called subroutines, functions, and data unless =*
 *= another source is specified.                                              =*
 *-----------------------------------------------------------------------------*
@@ -52,7 +52,7 @@
 * Solar zenith angle and azimuth
 * slant pathlengths in spherical geometry
 
-      REAL sza(kt), zen
+      REAL sza(kt), zen, sznoon
       INTEGER nid(0:kz)
       REAL dsdh(0:kz,kz)
 
@@ -215,27 +215,33 @@
 
       integer js_dna, js_uvi, jd_dom
       integer id
-      
+
 ! Agregado por Giovanni Gamaliel Lopez Padilla
-      integer hour,ihour,fhour
+      integer hour,ihour,fhour,endoffile
       CHARACTER*6 fileout
 
+
 * --- END OF DECLARATIONS ---------------------------------------------
-* re-entry point
 
  1000 CONTINUE
 
 * Open log file:
+
+c      OPEN(UNIT=kout,FILE='tuvlog',STATUS='UNKNOWN')
       OPEN(UNIT=kout,FILE='../tuvlog.txt',STATUS='UNKNOWN')
 
 * ___ SECTION 1: SIMPLE INPUT VARIABLES --------------------------------
 ******* Read simple input variables from a file:
-* ___ Open file with
+
+* can read interactively (intrct = .TRUE.) 
+* or in batch mode (intrct = .FALSE.)
       open(13,file="../data.txt")
 ! Handle for EOF
+
       do
-      read(13,*,err=504,End = 504) inpfil, fileout,tauaer,
-     $            o3_tc,iyear,imonth,iday,ihour,fhour
+      read(13,*,iostat = endoffile) inpfil,fileout,tauaer,
+     $            o3_tc,iyear,imonth,iday,ihour,fhour 
+      if (endoffile .LT. 0) call exit(123)
       CALL rdinp(intrct, 
      $     inpfil, outfil, nstr,   lat,    lon,    tmzone,
      $     iyear,  imonth, iday,   zstart, zstop,  nz,
@@ -247,12 +253,11 @@
      $     ljvals, ijfix,  nmj,    iwfix,  itfix,  izfix,
      $     ims,    slabel, imj,    jlabel)
       iout = 30
-! Custom fileout
       outfil=fileout
-!Ciclo para calcular la irradiancia para cada minuto cada hora
       do hour=ihour,fhour-1
       tstart=hour
       tstop=hour+1
+
 * ___ SECTION 2: SET GRIDS _________________________________________________
 
 * altitudes (creates altitude grid, locates index for selected output, izout)
@@ -265,7 +270,7 @@
       CALL gridt(lat, lon, tmzone,
      $     iyear, imonth, iday,
      $     lzenit, tstart, tstop,
-     $     nt, t, sza, esfact)
+     $     nt, t, sza, sznoon, esfact)
 
 * wavelength grid, user-set range and spacing. 
 * NOTE:  Wavelengths are in vacuum, and therefore independent of altitude.
@@ -402,7 +407,7 @@ C      zpbl = 3.
      $        jd_dom = jd
       ENDDO
 
-!      write(*,*) js_dna, js_uvi, jd_dom
+c      write(*,*) js_dna, js_uvi, jd_dom
 
 **** The following CALL is normally commented out.
 * Subroutine newlst regenerates the list of weighting functions 
@@ -506,14 +511,20 @@ c            dt_any(iz,iw) = 0.79*aircol(iz) * 2.e-17 ! N2 VUV absorption
 
 * Loop over time or solar zenith angle (zen):
 
+      
+      !write(*,*) 'Date, Lat, Lon, Min_SZA'
+      !write(*,222) iyear,imonth,iday,lat,lon,sznoon
+ 222  format(i4,'/',i2,'/',i2,3(1x,F7.3))
+      
       DO 20, it = 1, nt
 
          zen = sza(it)
 
-!         WRITE(*,200) it, zen, esfact(it)
-         WRITE(kout,200) it, zen, esfact(it)
+         !WRITE(*,200) it, zen, esfact(it)
+         !WRITE(kout,200) it, zen, esfact(it)
  200     FORMAT('step = ', I4,' sza = ', F9.3, 
      $        ' Earth-sun factor = ', F10.7)
+
 
 * correction for earth-sun distance
 
@@ -675,8 +686,8 @@ c            dt_any(iz,iw) = 0.79*aircol(iz) * 2.e-17 ! N2 VUV absorption
 
 * output in-water doses
 
- !     write(*,222) adose, wdose0, wdosei, dlabel(jd_dom)
- 222  format(3(0pf10.4,1x),a50)
+c      write(*,222) adose, wdose0, wdosei, dlabel(jd_dom)
+c 222  format(3(0pf10.4,1x),a50)
 
 **output all Js at zout
 
@@ -702,16 +713,14 @@ c 444  format(1pe11.4,1x,a50)
      $     svj_zj, svj_tj, svj_zt,
      $     svr_zs, svr_ts, svr_zt,
      $     svf_zw, svf_tw, svf_zt,
-     $     svi_zw, svi_tw, svi_zt)
+     $     svi_zw, svi_tw, svi_zt )
 
  30   continue
 ! End for minute results
       end do
 ! End for all the days in dataset
       end do
- 504  continue
-      close(13)
-*_______________________________________________________________________
+      CLOSE(13)
 
       CLOSE(iout)
       CLOSE(kout)

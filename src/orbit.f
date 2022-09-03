@@ -73,7 +73,7 @@ c $Header: sunae.f,v 1.3 96/05/30 09:30:15 wiscombe Exp $
 c ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       SUBROUTINE SUNAE( YEAR, DAY, HOUR, LAT, LONG, lrefr,
-     &                  AZ, EL, SOLDIA, SOLDST )
+     &                  ELNOON, AZ, EL, SOLDIA, SOLDST )
 
 c     Calculates the local solar azimuth and elevation angles, and
 c     the distance to and angle subtended by the Sun, at a specific 
@@ -162,6 +162,9 @@ c               0 to 360 degs)
 
 c      EL       solar elevation angle [-90 to 90 degs]; 
 c               solar zenith angle = 90 - EL
+
+!      ELNOON   solar elevation angle at local noon 
+!               added by SM Nov 2020
 
 c      SOLDIA   solar diameter [degs]
 
@@ -260,6 +263,7 @@ c     .. Scalar Arguments ..
 
       INTEGER   YEAR, DAY
       REAL      AZ, EL, HOUR, LAT, LONG, SOLDIA, SOLDST
+      REAL  ELNOON
 c     ..
 c     .. Local Scalars ..
 
@@ -387,9 +391,14 @@ c                    ** hour angle in radians between -pi and pi
       IF( HA.GT.PI )   HA  = HA - TWOPI
 
 c                    ** solar azimuth and elevation
-
+!     noon when HA = 0
+      
       EL  = ASIN( SIN( DEC )*SIN( LAT*RPD ) +
      &            COS( DEC )*COS( LAT*RPD )*COS( HA ) )
+
+      ELNOON  = ASIN( SIN( DEC )*SIN( LAT*RPD ) +
+     &            COS( DEC )*COS( LAT*RPD ) )
+
 
       AZ  = ASIN( - COS( DEC )*SIN( HA ) / COS( EL ) )
 
@@ -408,6 +417,7 @@ c                    ** Put azimuth between 0 and 2*pi radians
 c                     ** Convert elevation and azimuth to degrees
       EL  = EL / RPD
       AZ  = AZ / RPD
+      ELNOON = ELNOON / RPD
 
 c  ======== Refraction correction for U.S. Standard Atmos. ==========
 c      (assumes elevation in degs) (3.51823=1013.25 mb/288 K)

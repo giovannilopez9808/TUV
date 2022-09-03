@@ -44,7 +44,7 @@ FC = gfortran
 
 # FFLAGS : command line options to compiler call (if not set, default is
 #          probably some basic optimization level)
-FFLAGS = -O
+#FFLAGS = -O
 
 # LIBS  : libraries required
 # LIBS =  

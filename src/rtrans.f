@@ -105,7 +105,7 @@
 
 *  specific to psndo:
 
-      REAL pmcld, pmray, pmaer, pmsnw
+      REAL pmcld, pmray, pmaer, pmsnw, pmany
       REAL om1
       INTEGER istr, iu
 
@@ -181,7 +181,8 @@
            IF(dtsct .EQ. 1./largest) om(ii) = 1./largest
          g(ii) = (gcld(i,iw)*dscld + 
      $            gsnw(i,iw)*dssnw +
-     $            gaer(i,iw)*dsaer)/dtsct
+     $            gaer(i,iw)*dsaer +
+     $            g_any(i,iw)*dsany)/dtsct
 
          IF(nstr .LT. 2) GO TO 10
 
@@ -199,6 +200,7 @@
             PMCLD = GCLD(i,iw)**(ISTR)
             PMAER = GAER(i,iw)**(ISTR)
             PMSNW = GSNW(i,iw)**(ISTR)
+            PMANY = g_any(i,iw)**(ISTR)
             IF(ISTR .EQ. 2) THEN
                PMRAY = 0.1
             ELSE
@@ -206,7 +208,8 @@
             ENDIF
             PMOM(ISTR,II) = (PMCLD*DSCLD + 
      $           PMAER*DSAER + 
-     $           PMSNW*DSSNW + 
+     $           PMSNW*DSSNW +
+     $           PMANY*DSANY +
      $           PMRAY*DTRL(i,iw)) / DTSCT
  15      CONTINUE
 
@@ -377,9 +380,9 @@ c         WRITE (*,*) edn(1),' = ',irrad,' ?'
 
 * For calculations of Associated Legendre Polynomials for GAMA1,2,3,4
 * in delta-function, modified quadrature, hemispheric constant,
-* Hybrid modified Eddington-delta function metods, p633,Table1.
-* W.E.Meador and W.R.Weaver, GAS,1980,v37,p.630
-* W.J.Wiscombe and G.W. Grams, GAS,1976,v33,p2440, 
+* Hybrid modified Eddington-delta function methods, p633,Table1.
+* W.E.Meador and W.R.Weaver, J.Atmos.Sci.,1980,v37,p.630
+* W.J.Wiscombe and G.W. Grams, J.Atmos.Sci.,1976,v33,p2440. 
 * uncomment the following two lines and the appropriate statements further
 * down.
 C     REAL YLM0, YLM2, YLM4, YLM6, YLM8, YLM10, YLM12, YLMS, BETA0,
@@ -1158,7 +1161,7 @@ c     .. Local Scalars ..
       LOGICAL   COMPAR, LYRCUT, PASS1
       INTEGER   IQ, IU, J, KCONV, L, LC, LEV, LU, MAZIM, NAZ, NCOL,
      &          NCOS, NCUT, NN
-      REAL      ANGCOS, AZERR, AZTERM, BPLANK, COSPHI, DELM0, DITHER,
+      REAL      ANGCOS(1), AZERR, AZTERM, BPLANK, COSPHI, DELM0, DITHER,
      &          DUM, RPD, SGN, TPLANK
 c     ..
 c     .. Local Arrays ..
@@ -2919,7 +2922,7 @@ c     .. Scalar Arguments ..
 c     ..
 c     .. Array Arguments ..
 
-      REAL      MU( * ), YLM( 0:MAXMU, * )
+      REAL      MU( NMU ), YLM( 0:MAXMU, NMU )
 c     ..
 c     .. Local Scalars ..
 
@@ -3552,7 +3555,7 @@ c     .. Intrinsic Functions ..
 
       INTRINSIC ABS, EXP
 c     ..
-      DATA      ABSCUT / 10. /
+      DATA      ABSCUT / 10000. /
 
 
       IF( .NOT.USRTAU ) THEN

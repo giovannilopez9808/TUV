@@ -466,6 +466,10 @@ c      ENDDO
          s(j,iw) = yg(iw)
       ENDDO
 
+! virus inactivation for testing purposes only, disable in web calculatro
+       
+      GOTO 999
+
 ****** Virus inactivation
 * Action spectrum for the inactivation of various viruses.  The action spectrum
 * shape is estimated to be the same for all viruses.  It is normalized at 254 nm.
@@ -503,11 +507,11 @@ c      ENDDO
          s(j,iw) = 3600.*yg(iw)/17.
       ENDDO
 
-
 ****************************************************************
 ****************************************************************
 *_______________________________________________________________________
 
+ 999  CONTINUE
       IF (j .GT. ks) STOP '1001'
 *_______________________________________________________________________
 

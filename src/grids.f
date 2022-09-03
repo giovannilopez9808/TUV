@@ -416,7 +416,7 @@ c 333  format(3(0pf11.4))
 * entire grid (nz levels) in increments zincr 
 
  1    CONTINUE
-!      WRITE(*,*) 'equally spaced z-grid'
+      !WRITE(*,*) 'equally spaced z-grid'
       zincr = (zstop - zstart) / FLOAT(nz - 1)
       z(1) = zstart
       DO i = 2, nz
@@ -428,7 +428,7 @@ c 333  format(3(0pf11.4))
 * entire grid (nz levels) in increments zincr 
 
  2    CONTINUE
-      WRITE(*,*) 'equally spaced z-grid'
+      !WRITE(*,*) 'equally spaced z-grid'
       zincr = (zstop - zstart) / FLOAT(nz - 1)
       nlev = nz-1
       n = 1
@@ -643,7 +643,7 @@ c 333  format(3(0pf11.4))
       SUBROUTINE gridt(lat, lon, tmzone,
      $     iyear, imonth, iday,
      $     lzenit, tstart, tstop,
-     $     nt, t, sza, esrm2)
+     $     nt, t, sza, sznoon, esrm2)
 
 *-----------------------------------------------------------------------------*
 *=  Subroutine to create time (or solar zenith angle) grid                   =*
@@ -665,7 +665,7 @@ c 333  format(3(0pf11.4))
 
 * OUTPUTS
 
-      REAL t(kt), sza(kt), esrm2(kt)
+      REAL t(kt), sza(kt), esrm2(kt), sznoon
 
 * INTERNAL
 
@@ -675,7 +675,7 @@ c 333  format(3(0pf11.4))
       INTEGER jday, nday
       LOGICAL oky, okm, okd
 
-      REAL az, el, soldia, soldst
+      REAL az, el, elnoon, soldia, soldst
 
 *  switch for refraction correction to solar zenith angle. Because
 * this is only for the observed sza at the surface, do not use.
@@ -714,8 +714,9 @@ c 333  format(3(0pf11.4))
 
                ut = t(it) - tmzone
                CALL sunae(iyear, jday, ut, lat, lon, lrefr,
-     &              az, el, soldia, soldst )
+     &              elnoon, az, el, soldia, soldst )
                sza(it) = 90. - el
+               sznoon = 90. - elnoon
                esrm2(it) = 1./(soldst*soldst)
             ELSE
                WRITE(*,*) '**** incorrect date specification'

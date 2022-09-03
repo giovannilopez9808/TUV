@@ -96,11 +96,11 @@
       DO i = 1, nhead
          WRITE(*,*) ahline(i)
       ENDDO
-!      WRITE(*,100) 
+      WRITE(*,100) 
 
-!      WRITE(*,*) ' Type ?? for general information'
-!      WRITE(*,*) ' or <enter> to continue'
-      !READ(*,115) avar
+      WRITE(*,*) ' Type ?? for general information'
+      WRITE(*,*) ' or <enter> to continue'
+      READ(*,115) avar
  115  FORMAT(A7)
       IF(avar(1:2) .EQ. '??' ) THEN
          CALL gethlp(avar, nhelp, ahline)
@@ -113,16 +113,24 @@ CSM         PAUSE
 * choose input file
 
  10   CONTINUE
- !     WRITE(*,*) 'select input file'
- !     WRITE(*,*) ' <enter>: usrinp (if created before)'
- !     WRITE(*,*)' 1: defin1 (default No. 1, optimized for surface UV)' 
- !     WRITE(*,*)' 2: defin2 (default No. 2, optimized for photochem )' 
- !     WRITE(*,*)' 3: defin3 (default No. 3, optimized for master mech)' 
- !     WRITE(*,*)' 4: defin4 (default No. 4, sample of all outputs)'
- !     WRITE(*,*)' 5: defin5 (default No. 5, spectra for WRF-chem)'
+      WRITE(*,*) 'select input file'
+      WRITE(*,*) ' <enter>: usrinp (if created before)'
+      WRITE(*,*)' 1: defin1 (default No. 1, optimized for surface UV)' 
+      WRITE(*,*)' 2: defin2 (default No. 2, optimized for photochem )' 
+      WRITE(*,*)' 3: defin3 (default No. 3, optimized for master mech)' 
+      WRITE(*,*)' 4: defin4 (default No. 4, sample of all outputs)'
+      WRITE(*,*)' 5: defin5 (default No. 5, spectra for WRF-chem)'
       
+      WRITE(*,*) ' file-name for others '
+      READ(*,120) inpfil
  120  FORMAT(a6)
       
+      IF(inpfil .EQ. ' ') inpfil = 'usrinp'
+      IF(inpfil(1:1) .EQ. '1') inpfil = 'defin1'
+      IF(inpfil(1:1) .EQ. '2') inpfil = 'defin2'
+      IF(inpfil(1:1) .EQ. '3') inpfil = 'defin3'
+      IF(inpfil(1:1) .EQ. '4') inpfil = 'defin4'
+      IF(inpfil(1:1) .EQ. '5') inpfil = 'defin5'
       
  12   CONTINUE
       INQUIRE(file='INPUTS/'//inpfil,exist=lexist)
@@ -199,11 +207,10 @@ CSM         PAUSE
 * confirm or change or get help
 
  30   CONTINUE
- !     WRITE(*,*) 'Type ?variable for help on a variable, or'
- !     WRITE(*,*) '<enter> = keep these settings, or'
- !     WRITE(*,*) 'Type variable name to change (lower case):'
-      !READ(*,300) avar
-      avar=""
+      WRITE(*,*) 'Type ?variable for help on a variable, or'
+      WRITE(*,*) '<enter> = keep these settings, or'
+      WRITE(*,*) 'Type variable name to change (lower case):'
+      READ(*,300) avar
  300  FORMAT(A7)
 
 * confirm
@@ -265,12 +272,11 @@ c      finame = tmpfil(1:nlen)
 
  50   CONTINUE
 
- !     WRITE(*,*) 'save inputs to file?'
- !     WRITE(*,*) ' <enter> = do not save'
- !     WRITE(*,*) ' 1 = save to file: usrinp '
- !     WRITE(*,*) ' or write new file name'
-      !READ(*,500) savfil
-      savfil="CHO"
+      WRITE(*,*) 'save inputs to file?'
+      WRITE(*,*) ' <enter> = do not save'
+      WRITE(*,*) ' 1 = save to file: usrinp '
+      WRITE(*,*) ' or write new file name'
+      READ(*,500) savfil
  500  FORMAT(A6) 
       IF (savfil .EQ. ' ') GO TO 99
       IF (savfil(1:1) .EQ. '1') savfil = 'usrinp'
@@ -308,6 +314,8 @@ c      finame = tmpfil(1:nlen)
 ***** done
 
  99   CONTINUE
+
+      !WRITE(*,*) 'done: loading inputs'
 
       CALL write1(kout,
      $     inpfil, outfil, nstr,   lat,    lon,    tmzone,
@@ -378,8 +386,8 @@ c      finame = tmpfil(1:nlen)
       ENDDO
 
       IF(iout .EQ. 6) then
-         WRITE(*,100)
-         WRITE(*,1000)
+         !WRITE(*,100)
+         !WRITE(*,1000)
          WRITE(*,105) inpf, outf, nstr
          WRITE(*,110) lat, lon, tmzone
          WRITE(*,115) iyear, imonth, iday
@@ -398,8 +406,8 @@ c      finame = tmpfil(1:nlen)
          WRITE(*,180) iwfix, itfix, izfix
          WRITE(*,1000)
       ELSE
-         WRITE(iout,100) 
-         WRITE(iout,1000)
+         !WRITE(iout,100) 
+         !WRITE(iout,1000)
          WRITE(iout,105) inpf, outf, nstr
          WRITE(iout,110) lat, lon, tmzone
          WRITE(iout,115) iyear, imonth, iday
